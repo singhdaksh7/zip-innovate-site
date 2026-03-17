@@ -522,7 +522,7 @@ footer { padding: 60px 60px 30px; border-top: 1px solid var(--border-subtle); po
         <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:800;letter-spacing:1px;line-height:1.3;margin-bottom:24px;">Ready to Build the<br><span class="gradient-text">Future Together?</span></h2>
         <p style="color:var(--text-secondary);font-size:1rem;line-height:1.8;margin-bottom:36px;">Fill out the form and our team will reach out within 24 hours.</p>
         <div class="contact-details">
-          <div class="contact-detail-item"><div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div><div><span class="detail-label">EMAIL</span><span class="detail-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="29414c45454669534059404747465f485d4c074a4644">[email&#160;protected]</a></span></div></div>
+          <div class="contact-detail-item"><div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div><div><span class="detail-label">EMAIL</span><span class="detail-value">hello@zipinnovate.com</span></div></div>
           <div class="contact-detail-item"><div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div><span class="detail-label">PHONE</span><span class="detail-value">+91 98765 43210</span></div></div>
           <div class="contact-detail-item"><div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><span class="detail-label">LOCATION</span><span class="detail-value">India</span></div></div>
         </div>
@@ -589,7 +589,7 @@ footer { padding: 60px 60px 30px; border-top: 1px solid var(--border-subtle); po
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ── Page Router ──
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -699,4 +699,10 @@ async function submitForm() {
 function resetForm() {
   document.getElementById('contactForm').style.display = 'block';
   document.getElementById('formSuccess').style.display = 'none';
-  ['firstName','lastName'
+  ['firstName','lastName','email','phone','company','message'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('service').selectedIndex = 0;
+  document.getElementById('budget').selectedIndex = 0;
+}
+</script>
+</body>
+</html>
