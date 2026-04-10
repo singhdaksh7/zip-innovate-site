@@ -71,6 +71,17 @@ body::before {
 .orb-3 { width:300px;height:300px;background:rgba(0,255,136,0.04);top:50%;left:40%;animation-delay:-8s; }
 @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-20px,15px) scale(.95)} }
 
+/* ── Crypto Blockchain Canvas ── */
+#cryptoCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.80;
+}
+
 /* ── Data Streams ── */
 .data-stream {
   position: fixed;
@@ -400,6 +411,9 @@ footer { padding: 60px 60px 30px; border-top: 1px solid var(--border-subtle); po
 <div class="data-stream stream-2"></div>
 <div class="data-stream stream-3"></div>
 <div class="data-stream stream-4"></div>
+
+<!-- Crypto Blockchain Background Animation -->
+<canvas id="cryptoCanvas"></canvas>
 
 <!-- NAV -->
 <nav>
@@ -816,6 +830,267 @@ function resetForm() {
   document.getElementById('service').selectedIndex = 0;
   document.getElementById('budget').selectedIndex = 0;
 }
+
+/* ═══════════════════════════════════════════════
+   CRYPTO BLOCKCHAIN BACKGROUND ANIMATION
+═══════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('cryptoCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = {
+    cyan:   '#00F0FF',
+    purple: '#8B5CF6',
+    green:  '#00FF88',
+    gold:   '#FFD700',
+    orange: '#FF6B35',
+  };
+  const COLOR_LIST = Object.values(COLORS);
+
+  // Crypto symbols to float across screen
+  const CRYPTO_SYMBOLS = ['₿','Ξ','◎','Ł','Ð','✕','◈','⬡','⬢','∞','⟠','▲','◆'];
+
+  let W, H;
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* ── Floating Crypto Symbols ── */
+  class CryptoSymbol {
+    constructor() { this.reset(true); }
+    reset(initial) {
+      this.x = Math.random() * W;
+      this.y = initial ? Math.random() * H : H + 40;
+      this.symbol = CRYPTO_SYMBOLS[Math.floor(Math.random() * CRYPTO_SYMBOLS.length)];
+      this.size   = 28 + Math.random() * 48;
+      this.speed  = 0.3 + Math.random() * 0.7;
+      this.drift  = (Math.random() - 0.5) * 0.4;
+      this.opacity = 0.22 + Math.random() * 0.40;
+      this.color  = COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)];
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.015;
+      this.pulse = Math.random() * Math.PI * 2;
+    }
+    update() {
+      this.y -= this.speed;
+      this.x += this.drift;
+      this.rotation += this.rotSpeed;
+      this.pulse += 0.02;
+      if (this.y < -50) this.reset(false);
+    }
+    draw() {
+      const glow = Math.sin(this.pulse) * 0.5 + 0.5;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.globalAlpha = this.opacity * (0.6 + glow * 0.4);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8 + glow * 12;
+      ctx.font = `${this.size}px 'Orbitron', monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.symbol, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  /* ── Blockchain Nodes & Links ── */
+  class BlockNode {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.vx = (Math.random() - 0.5) * 0.35;
+      this.vy = (Math.random() - 0.5) * 0.35;
+      this.r  = 2 + Math.random() * 3;
+      this.color = COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)];
+      this.pulse = Math.random() * Math.PI * 2;
+      this.opacity = 0.25 + Math.random() * 0.45;
+      // occasionally attach a mini label
+      this.label = Math.random() > 0.65
+        ? '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6,'0').slice(0,4)
+        : null;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.pulse += 0.025;
+      if (this.x < 0 || this.x > W) this.vx *= -1;
+      if (this.y < 0 || this.y > H) this.vy *= -1;
+    }
+    draw() {
+      const glow = Math.sin(this.pulse) * 0.5 + 0.5;
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      // outer ring
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r + 3 + glow * 3, 0, Math.PI * 2);
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 0.5;
+      ctx.globalAlpha = this.opacity * 0.3;
+      ctx.stroke();
+      // core dot
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10 + glow * 15;
+      ctx.globalAlpha = this.opacity;
+      ctx.fill();
+      // hash label
+      if (this.label) {
+        ctx.globalAlpha = this.opacity * 0.5;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 0;
+        ctx.font = '7px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(this.label, this.x + this.r + 4, this.y + 3);
+      }
+      ctx.restore();
+    }
+  }
+
+  /* ── Data Packet that travels along a link ── */
+  class DataPacket {
+    constructor(from, to) {
+      this.from = from;
+      this.to   = to;
+      this.t    = 0;
+      this.speed = 0.004 + Math.random() * 0.006;
+      this.color = from.color;
+      this.size  = 2.5;
+    }
+    update() { this.t += this.speed; }
+    done()   { return this.t >= 1; }
+    draw() {
+      const x = this.from.x + (this.to.x - this.from.x) * this.t;
+      const y = this.from.y + (this.to.y - this.from.y) * this.t;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 14;
+      ctx.globalAlpha = 0.9;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  /* ── Falling hex-hash strings (Matrix style) ── */
+  class HexStream {
+    constructor() { this.reset(true); }
+    reset(initial) {
+      this.x   = Math.floor(Math.random() * (W / 14)) * 14;
+      this.y   = initial ? Math.random() * H : -20;
+      this.speed  = 0.6 + Math.random() * 1.4;
+      this.length = 6 + Math.floor(Math.random() * 10);
+      this.chars  = Array.from({length: this.length}, () => this._char());
+      this.timer  = 0;
+      this.changeEvery = 8 + Math.floor(Math.random() * 16);
+      this.color  = Math.random() > 0.5 ? COLORS.cyan : COLORS.green;
+      this.opacity = 0.10 + Math.random() * 0.18;
+    }
+    _char() {
+      const pool = '0123456789ABCDEF';
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+    update() {
+      this.y += this.speed;
+      this.timer++;
+      if (this.timer % this.changeEvery === 0) {
+        const i = Math.floor(Math.random() * this.length);
+        this.chars[i] = this._char();
+      }
+      if (this.y > H + this.length * 13) this.reset(false);
+    }
+    draw() {
+      ctx.save();
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      for (let i = 0; i < this.chars.length; i++) {
+        const alpha = (1 - i / this.chars.length) * this.opacity;
+        const bright = i === 0 ? 1.0 : 0.5;
+        ctx.globalAlpha = alpha * bright;
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = i === 0 ? 8 : 0;
+        ctx.fillText(this.chars[i], this.x, this.y - i * 13);
+      }
+      ctx.restore();
+    }
+  }
+
+  /* ── Init populations ── */
+  const NUM_SYMBOLS  = 55;
+  const NUM_NODES    = 55;
+  const NUM_HEXSTREAMS = 22;
+  const LINK_DIST   = 160;
+
+  const symbols   = Array.from({length: NUM_SYMBOLS},   () => new CryptoSymbol());
+  const nodes     = Array.from({length: NUM_NODES},     () => new BlockNode());
+  const hexstreams = Array.from({length: NUM_HEXSTREAMS}, () => new HexStream());
+  let packets = [];
+  let frame   = 0;
+
+  function spawnPackets() {
+    if (Math.random() < 0.06 && packets.length < 40) {
+      const a = nodes[Math.floor(Math.random() * nodes.length)];
+      const b = nodes[Math.floor(Math.random() * nodes.length)];
+      if (a !== b) packets.push(new DataPacket(a, b));
+    }
+  }
+
+  function drawLinks() {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < LINK_DIST) {
+          const alpha = (1 - dist / LINK_DIST) * 0.12;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = nodes[i].color;
+          ctx.lineWidth = 0.6;
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    frame++;
+
+    // hex streams (background layer)
+    hexstreams.forEach(s => { s.update(); s.draw(); });
+
+    // blockchain network
+    drawLinks();
+    nodes.forEach(n => { n.update(); n.draw(); });
+
+    // data packets
+    spawnPackets();
+    packets = packets.filter(p => { p.update(); p.draw(); return !p.done(); });
+
+    // crypto symbols (foreground float)
+    symbols.forEach(s => { s.update(); s.draw(); });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+})();
 </script>
 </body>
 </html>
